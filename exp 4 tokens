@@ -1,0 +1,25 @@
+%{
+int n=0;
+%}
+%%
+(stdio.h|conio.h) { printf("%s is a standard library\n",yytext); }
+(void|main|printf|int|while|if|else|float) {n++; printf("%s is a keyword\n",yytext);}
+[a-zA-Z_][a-zA-Z0-9_]*  {n++; printf("%s is a identifier\n", yytext);}
+[0-9]+  {n++; printf("%s is a integer\n", yytext);}
+[0-9]*"."[0-9]+ {n++;printf("%s is float\n" ,yytext);}
+"<="|"=="|"="|"+"|"-"|"*"|"/"|"++" {n++; printf("%s is a operator\n", yytext);}
+[(){}|,;] {n++;printf("%s is a punctuation\n", yytext);}
+\"(\\.|[^"\\])*\"  {n++; printf("%s is a string literal\n", yytext); }
+.|\n {  }
+%%
+int yywrap(void) 
+{
+return 1;
+}
+int main(int argc, char *argv[]) 
+{
+yyin = fopen(argv[1], "r");
+yylex();
+printf("\n Total no.of tokens = %d\n", n);
+fclose(yyin);
+}
