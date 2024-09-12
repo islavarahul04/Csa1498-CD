@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_PRODUCTIONS 100
+#define MAX_STRING_LENGTH 100
+
+typedef struct {
+    char non_terminal;
+    char production[MAX_STRING_LENGTH];
+} Production;
+
+void left_factoring(Production productions[], int count) {
+    for (int i = 0; i < count; i++) {
+        char A = productions[i].non_terminal;
+        char prefix[MAX_STRING_LENGTH] = {0};
+        char remaining[MAX_PRODUCTIONS][MAX_STRING_LENGTH];
+        int rem_count = 0;
+
+        printf("Processing production for non-terminal '%c': %s\n", A, productions[i].production);
+
+
+        int j = 0;
+        while (productions[i].production[j] != '\0' && productions[i].production[j] != '|') {
+            if (prefix[0] == '\0' || productions[i].production[j] == prefix[j]) {
+                prefix[j] = productions[i].production[j];
+                j++;
+            } else {
+                break;
+            }
+        }
+        prefix[j] = '\0';
+
+
+        if (prefix[0] != '\0') {
+            printf("Common prefix: %s\n", prefix);
+
+
+            char *p = strchr(productions[i].production, '|');
+            while (p != NULL) {
+                strcpy(remaining[rem_count++], p + 1);
+                p = strchr(p + 1, '|');
+            }
+
+
+            char new_non_terminal = A + 1;
+            printf("%c -> %s%c\n", A, prefix, new_non_terminal);
+            for (int k = 0; k < rem_count; k++) {
+                printf("%c -> %s\n", new_non_terminal, remaining[k]);
+            }
+            printf("%c -> e\n", new_non_terminal);
+        }
+    }
+}
+
+int main() {
+    Production productions[MAX_PRODUCTIONS];
+    int count = 0;
+
+    printf("Enter number of productions: ");
+    scanf("%d", &count);
+
+    for (int i = 0; i < count; i++) {
+        printf("Enter non-terminal and production for production %d (format: A->alpha|beta): ", i + 1);
+        scanf(" %c", &productions[i].non_terminal);
+        scanf("%s", productions[i].production);
+    }
+
+    left_factoring(productions, count);
+
+    return 0;
+}
