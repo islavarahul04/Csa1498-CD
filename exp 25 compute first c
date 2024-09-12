@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_PRODUCTIONS 100
+#define MAX_SYMBOLS 100
+#define MAX_STRING_LENGTH 100
+
+typedef struct {
+    char non_terminal;
+    char production[MAX_STRING_LENGTH];
+} Production;
+
+typedef struct {
+    char non_terminal;
+    char first[MAX_STRING_LENGTH];
+} FirstSet;
+
+
+bool is_in_string(char ch, const char *str) {
+    return strchr(str, ch) != NULL;
+}
+
+
+void compute_first(Production productions[], int count, FirstSet first_sets[], int *first_count) {
+    for (int i = 0; i < count; i++) {
+        char A = productions[i].non_terminal;
+        char *p = productions[i].production;
+        printf("Computing First for non-terminal '%c':\n", A);
+
+        
+        char *alt = strtok(p, "|");
+        while (alt != NULL) {
+          
+            int j = 0;
+            while (alt[j] != '\0') {
+                char symbol = alt[j];
+                if (symbol >= 'A' && symbol <= 'Z') {
+              
+                    bool found = false;
+                    for (int k = 0; k < *first_count; k++) {
+                        if (first_sets[k].non_terminal == symbol) {
+                            strcat(first_sets[0].first, first_sets[k].first);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        printf("Error: First set for non-terminal '%c' not found\n", symbol);
+                    }
+                    break;
+                } else {
+                    
+                    if (!is_in_string(symbol, first_sets[0].first)) {
+                        strncat(first_sets[0].first, &symbol, 1);
+                    }
+                    break;
+                }
+                j++;
+            }
+            alt = strtok(NULL, "|");
+        }
+        printf("First(%c) = %s\n", A, first_sets[0].first);
+    }
+}
+
+int main() {
+    Production productions[MAX_PRODUCTIONS];
+    FirstSet first_sets[MAX_PRODUCTIONS];
+    int count = 0;
+    int first_count = 0;
+
+    printf("Enter number of productions: ");
+    scanf("%d", &count);
+
+    for (int i = 0; i < count; i++) {
+        printf("Enter non-terminal and production for production %d (format: A->alpha|beta): ", i + 1);
+        scanf(" %c", &productions[i].non_terminal);
+        scanf("%s", productions[i].production);
+
+        
+        first_sets[first_count].non_terminal = productions[i].non_terminal;
+        first_sets[first_count].first[0] = '\0';
+        first_count++;
+    }
+
+    compute_first(productions, count, first_sets, &first_count);
+
+    return 0;
+}
